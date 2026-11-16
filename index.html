@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recipe Box</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#c2562b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Recipes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf6ef; --card:#ffffff; --ink:#2b2420; --muted:#7a6e64; --line:#e8dfd3;
+  --accent:#c2562b; --accent-soft:#f6e3d8; --star:#e0a526;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#1c1917; --card:#26221f; --ink:#f3ede6; --muted:#a89c90; --line:#3a332e; --accent:#e07a4c; --accent-soft:#3b2a22; }
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Inter,system-ui,sans-serif;-webkit-text-size-adjust:100%}
+body{padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;margin:0;line-height:1.2}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+input,textarea,select{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:11px 12px;width:100%}
+textarea{resize:vertical;min-height:120px}
+input:focus,textarea:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px;border-color:transparent}
+.wrap{max-width:680px;margin:0 auto;padding:16px 16px 110px}
+header.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 14px}
+header.top h1{font-size:30px}
+.sub{color:var(--muted);font-size:14px}
+.search{position:relative;margin-bottom:12px}
+.search input{padding-left:38px;border-radius:999px}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);opacity:.5}
+.chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:7px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:14px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.list{display:flex;flex-direction:column;gap:10px}
+.item{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:14px;text-align:left;width:100%}
+.item .badge{flex:0 0 44px;height:44px;border-radius:12px;background:var(--accent-soft);display:grid;place-items:center;font-family:Fraunces,serif;font-weight:700;color:var(--accent);font-size:20px}
+.item .meta{flex:1;min-width:0}
+.item .t{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .s{color:var(--muted);font-size:13px}
+.star,#favBtn.star{color:var(--star)}
+.empty{text-align:center;color:var(--muted);padding:48px 16px}
+.empty h2{color:var(--ink);font-size:22px;margin-bottom:6px}
+.fab{position:fixed;right:max(20px,env(safe-area-inset-right));bottom:max(22px,env(safe-area-inset-bottom));background:var(--accent);color:#fff;border-radius:999px;padding:15px 22px;font-weight:600;box-shadow:0 6px 20px rgba(0,0,0,.18);display:flex;gap:8px;align-items:center}
+.view{display:none}.view.on{display:block}
+.bar{display:flex;align-items:center;justify-content:space-between;margin:6px 0 16px;gap:8px}
+.btn{padding:10px 14px;border-radius:10px;font-weight:500}
+.btn.ghost{color:var(--muted)}
+.btn.primary{background:var(--accent);color:#fff}
+.btn.danger{color:#c0392b}
+.r-title{font-size:28px;margin-bottom:6px}
+.facts{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 18px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13px;color:var(--muted)}
+.fact b{color:var(--ink);font-weight:600}
+section.block{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);padding:16px;margin-bottom:14px}
+section.block h3{font-size:19px;margin-bottom:10px}
+.ing{display:flex;gap:12px;align-items:flex-start;padding:8px 0;border-bottom:1px dashed var(--line)}
+.ing:last-child{border-bottom:0}
+.ing input{width:20px;height:20px;margin-top:2px;accent-color:var(--accent);flex:0 0 20px}
+.ing.done span{text-decoration:line-through;color:var(--muted)}
+ol.steps{margin:0;padding-left:0;list-style:none;counter-reset:s}
+ol.steps li{counter-increment:s;position:relative;padding:8px 0 12px 40px;cursor:pointer}
+ol.steps li::before{content:counter(s);position:absolute;left:0;top:7px;width:28px;height:28px;border-radius:50%;background:var(--accent-soft);color:var(--accent);font-weight:600;display:grid;place-items:center;font-size:14px}
+ol.steps li.done{color:var(--muted)}
+ol.steps li.done::before{content:"✓";background:var(--accent);color:#fff}
+.notes{white-space:pre-wrap}
+.src a{color:var(--accent);word-break:break-all}
+form label{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:14px 0 6px}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.hint{font-size:12px;color:var(--muted);margin-top:4px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:20}
+.toast.on{opacity:1}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;padding:20px;z-index:30}
+.modal.on{display:flex}
+.modal .box{background:var(--card);border-radius:16px;padding:20px;max-width:340px;width:100%}
+.modal .box p{margin:8px 0 18px;color:var(--muted)}
+.modal .acts{display:flex;justify-content:flex-end;gap:8px}
+.notice{background:var(--accent-soft);border-radius:10px;padding:10px 12px;font-size:14px;margin-bottom:12px;display:none}
+.notice.on{display:block}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- LIST VIEW -->
+  <div id="v-list" class="view on">
+    <header class="top">
+      <div><h1>Recipe Box</h1><div class="sub" id="count">Loading…</div></div>
+      <button class="btn ghost" id="menuBtn" aria-label="Backup and restore" style="font-size:22px">⋯</button>
+    </header>
+    <div class="notice" id="notice"></div>
+    <div class="search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="q" type="search" placeholder="Search recipes or ingredients" autocomplete="off">
+    </div>
+    <div class="chips" id="chips"></div>
+    <div class="list" id="list"></div>
+  </div>
+
+  <!-- DETAIL VIEW -->
+  <div id="v-detail" class="view">
+    <div class="bar">
+      <button class="btn ghost" data-back>← All recipes</button>
+      <div>
+        <button class="btn ghost" id="favBtn" aria-label="Favorite">☆</button>
+        <button class="btn ghost edit-only" id="editBtn">Edit</button>
+      </div>
+    </div>
+    <h2 class="r-title" id="d-title"></h2>
+    <div class="sub" id="d-cat"></div>
+    <div class="facts" id="d-facts"></div>
+    <section class="block" id="d-ing-wrap"><h3>Ingredients</h3><div id="d-ing"></div></section>
+    <section class="block" id="d-steps-wrap"><h3>Steps</h3><ol class="steps" id="d-steps"></ol></section>
+    <section class="block" id="d-notes-wrap"><h3>Notes</h3><div class="notes" id="d-notes"></div></section>
+    <section class="block src" id="d-src-wrap"><h3>Source</h3><div id="d-src"></div></section>
+  </div>
+
+  <!-- EDIT VIEW -->
+  <div id="v-edit" class="view">
+    <div class="bar">
+      <button class="btn ghost" id="cancelBtn">Cancel</button>
+      <button class="btn primary" id="saveBtn">Save</button>
+    </div>
+    <h2 id="e-head" style="font-size:24px">New recipe</h2>
+    <form id="form" autocomplete="off">
+      <label for="f-title">Name</label>
+      <input id="f-title" required placeholder="Grandma's chili">
+      <label for="f-cat">Category</label>
+      <input id="f-cat" list="cats" placeholder="Dinner, Dessert, Grill…">
+      <datalist id="cats"></datalist>
+      <div class="row">
+        <div><label for="f-serv">Serves</label><input id="f-serv" inputmode="numeric" placeholder="4"></div>
+        <div><label for="f-prep">Prep</label><input id="f-prep" placeholder="15 min"></div>
+        <div><label for="f-cook">Cook</label><input id="f-cook" placeholder="1 hr"></div>
+      </div>
+      <label for="f-ing">Ingredients</label>
+      <textarea id="f-ing" rows="7" placeholder="2 lb ground beef&#10;1 onion, diced&#10;2 cans kidney beans"></textarea>
+      <div class="hint">One per line. Tip: paste a whole list at once.</div>
+      <label for="f-steps">Steps</label>
+      <textarea id="f-steps" rows="8" placeholder="Brown the beef with the onion.&#10;Add beans and spices; simmer 45 minutes."></textarea>
+      <div class="hint">One step per line — numbering is added for you.</div>
+      <label for="f-notes">Notes</label>
+      <textarea id="f-notes" rows="3" placeholder="Better the next day. Double the cumin."></textarea>
+      <label for="f-src">Source link (optional)</label>
+      <input id="f-src" type="url" inputmode="url" placeholder="https://…">
+    </form>
+    <div style="margin-top:24px;text-align:center">
+      <button class="btn danger" id="delBtn" style="display:none">Delete recipe</button>
+    </div>
+  </div>
+</div>
+
+<button class="fab edit-only" id="addBtn"><span style="font-size:20px;line-height:1">＋</span> Add recipe</button>
+<div class="toast" id="toast"></div>
+<div class="modal" id="menu"><div class="box">
+  <h3>Backup &amp; restore</h3>
+  <p>Your recipes live only on this phone. Save a backup now and then, and use it to move recipes to a new phone or share them.</p>
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <button class="btn primary" id="exportBtn">Save backup file</button>
+    <button class="btn ghost" id="importBtn" style="border:1px solid var(--line)">Restore from backup…</button>
+    <input type="file" id="importFile" accept=".json,application/json" style="display:none">
+    <button class="btn ghost" id="menuClose">Close</button>
+  </div>
+  <div class="hint" id="lastBackup" style="margin-top:10px"></div>
+</div></div>
+<div class="modal" id="modal"><div class="box"><h3>Delete this recipe?</h3><p>This can't be undone.</p><div class="acts"><button class="btn ghost" id="mNo">Keep it</button><button class="btn primary" id="mYes" style="background:#c0392b">Delete</button></div></div></div>
+
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const KEY = "recipebox.v1", BKEY = "recipebox.lastBackup";
+  let canWrite = true, storageOk = true;
+  let recipes = [];
+  let filterCat = "All", onlyFav = false, query = "";
+  let currentId = null, editingId = null;
+  const checked = {};
+
+  // ---------- on-device storage ----------
+  function load(){
+    try{ const raw = localStorage.getItem(KEY); const arr = raw ? JSON.parse(raw) : []; return Array.isArray(arr) ? arr.filter(r => r && r.id) : []; }
+    catch(_){ storageOk = false; return []; }
+  }
+  function persist(){
+    try{ localStorage.setItem(KEY, JSON.stringify(recipes)); return true; }
+    catch(e){ toast(e && e.name === "QuotaExceededError" ? "Phone storage for this app is full" : "Couldn't save on this device"); return false; }
+  }
+  const newId = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36)+Math.random().toString(36).slice(2));
+  // ask the browser not to clear our data
+  try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(_){}
+  // keep in sync if open in two tabs
+  window.addEventListener("storage", e => { if (e.key === KEY){ recipes = load(); renderList(); if (currentId && $("#v-detail").classList.contains("on")) { recipes.find(x=>x.id===currentId) ? openDetail(currentId) : show("list"); } } });
+
+  // ---------- helpers ----------
+  const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  const lines = s => String(s || "").split(/\r?\n/).map(l => l.replace(/^\s*(?:\d+[.)]|[-*•])\s*/, "").trim()).filter(Boolean);
+  function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"),2400); }
+  function notice(msg){ const n=$("#notice"); n.textContent=msg||""; n.classList.toggle("on",!!msg); }
+  function show(v){ const was = $("#v-"+v).classList.contains("on"); document.querySelectorAll(".view").forEach(x=>x.classList.remove("on")); $("#v-"+v).classList.add("on"); $("#addBtn").style.display = (v==="list" && canWrite) ? "" : "none"; if(!was) window.scrollTo(0,0); }
+
+  // ---------- list ----------
+  function renderChips(){
+    const cats = [...new Set(recipes.map(r => (r.category||"").trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+    $("#cats").innerHTML = cats.map(c=>`<option value="${esc(c)}">`).join("");
+    if (filterCat !== "All" && !cats.includes(filterCat)) filterCat = "All";
+    const chips = [`<button class="chip ${filterCat==="All"&&!onlyFav?"on":""}" data-cat="All">All</button>`,
+      `<button class="chip ${onlyFav?"on":""}" data-fav="1">★ Favorites</button>`]
+      .concat(cats.map(c=>`<button class="chip ${filterCat===c&&!onlyFav?"on":""}" data-cat="${esc(c)}">${esc(c)}</button>`));
+    $("#chips").innerHTML = chips.join("");
+  }
+  function renderList(){
+    renderChips();
+    const q = query.toLowerCase();
+    const items = recipes.filter(r => {
+      if (onlyFav && !r.favorite) return false;
+      if (!onlyFav && filterCat !== "All" && (r.category||"").trim() !== filterCat) return false;
+      if (!q) return true;
+      return [r.title, r.category, r.ingredients, r.notes].join(" ").toLowerCase().includes(q);
+    }).sort((a,b) => (b.favorite?1:0)-(a.favorite?1:0) || (a.title||"").localeCompare(b.title||""));
+    $("#count").textContent = recipes.length === 1 ? "1 recipe" : `${recipes.length} recipes`;
+    if (!recipes.length){
+      $("#list").innerHTML = `<div class="empty"><h2>Your box is empty</h2><p>Tap <b>Add recipe</b> to save your first one.</p></div>`;
+      return;
+    }
+    if (!items.length){ $("#list").innerHTML = `<div class="empty">No recipes match.</div>`; return; }
+    $("#list").innerHTML = items.map(r => {
+      const bits = [r.category, r.servings && ("serves "+r.servings), r.cookTime].filter(Boolean).map(esc).join(" · ");
+      return `<button class="item" data-id="${esc(r.id)}">
+        <div class="badge">${esc((r.title||"?").trim().charAt(0).toUpperCase())}</div>
+        <div class="meta"><div class="t">${r.favorite?'<span class="star">★</span> ':''}${esc(r.title||"Untitled")}</div><div class="s">${bits||"&nbsp;"}</div></div>
+      </button>`;
+    }).join("");
+  }
+
+  // ---------- detail ----------
+  function openDetail(id){
+    const r = recipes.find(x=>x.id===id); if(!r) return;
+    currentId = id;
+    $("#d-title").textContent = r.title || "Untitled";
+    $("#d-cat").textContent = r.category || "";
+    $("#favBtn").textContent = r.favorite ? "★" : "☆";
+    $("#favBtn").classList.toggle("star", !!r.favorite);
+    const facts = [["Serves", r.servings],["Prep", r.prepTime],["Cook", r.cookTime]].filter(f=>f[1]);
+    $("#d-facts").innerHTML = facts.map(f=>`<span class="fact">${f[0]} <b>${esc(f[1])}</b></span>`).join("");
+    const set = checked[id] || (checked[id] = {ing:new Set(), step:new Set()});
+    const ing = lines(r.ingredients), steps = lines(r.steps);
+    $("#d-ing-wrap").style.display = ing.length ? "" : "none";
+    $("#d-ing").innerHTML = ing.map((l,i)=>`<label class="ing ${set.ing.has(i)?"done":""}"><input type="checkbox" data-i="${i}" ${set.ing.has(i)?"checked":""}><span>${esc(l)}</span></label>`).join("");
+    $("#d-steps-wrap").style.display = steps.length ? "" : "none";
+    $("#d-steps").innerHTML = steps.map((l,i)=>`<li data-i="${i}" class="${set.step.has(i)?"done":""}">${esc(l)}</li>`).join("");
+    $("#d-notes-wrap").style.display = r.notes ? "" : "none";
+    $("#d-notes").textContent = r.notes || "";
+    const src = (r.source||"").trim();
+    $("#d-src-wrap").style.display = src ? "" : "none";
+    $("#d-src").innerHTML = /^https?:\/\//i.test(src) ? `<a href="${esc(src)}" target="_blank" rel="noopener">${esc(src)}</a>` : esc(src);
+    show("detail");
+  }
+
+  // ---------- edit ----------
+  function openEdit(id){
+    editingId = id || null;
+    const r = id ? recipes.find(x=>x.id===id) : {};
+    $("#e-head").textContent = id ? "Edit recipe" : "New recipe";
+    $("#f-title").value = r.title||""; $("#f-cat").value = r.category||"";
+    $("#f-serv").value = r.servings||""; $("#f-prep").value = r.prepTime||""; $("#f-cook").value = r.cookTime||"";
+    $("#f-ing").value = r.ingredients||""; $("#f-steps").value = r.steps||"";
+    $("#f-notes").value = r.notes||""; $("#f-src").value = r.source||"";
+    $("#delBtn").style.display = id ? "" : "none";
+    show("edit");
+    if(!id) setTimeout(()=>$("#f-title").focus(), 50);
+  }
+  function save(){
+    const title = $("#f-title").value.trim();
+    if (!title){ toast("Give it a name first"); $("#f-title").focus(); return; }
+    const prev = editingId ? recipes.find(x=>x.id===editingId) : null;
+    const rec = {
+      id: prev ? prev.id : newId(),
+      title, category: $("#f-cat").value.trim(),
+      servings: $("#f-serv").value.trim(), prepTime: $("#f-prep").value.trim(), cookTime: $("#f-cook").value.trim(),
+      ingredients: $("#f-ing").value.trim(), steps: $("#f-steps").value.trim(),
+      notes: $("#f-notes").value.trim(), source: $("#f-src").value.trim(),
+      favorite: prev ? !!prev.favorite : false,
+      created: prev?.created || new Date().toISOString(),
+      updated: new Date().toISOString()
+    };
+    const before = recipes.slice();
+    const i = recipes.findIndex(x=>x.id===rec.id);
+    if (i>=0) recipes[i] = rec; else recipes.push(rec);
+    if (!persist()){ recipes = before; return; }
+    delete checked[rec.id];
+    renderList(); openDetail(rec.id); toast("Saved");
+  }
+  function toggleFav(){
+    const r = recipes.find(x=>x.id===currentId); if(!r) return;
+    r.favorite = !r.favorite;
+    if (!persist()){ r.favorite = !r.favorite; return; }
+    $("#favBtn").textContent = r.favorite ? "★" : "☆"; $("#favBtn").classList.toggle("star", r.favorite);
+    renderList();
+  }
+  function doDelete(){
+    $("#modal").classList.remove("on");
+    if (!editingId) return;
+    const before = recipes.slice();
+    recipes = recipes.filter(x=>x.id!==editingId);
+    if (!persist()){ recipes = before; return; }
+    renderList(); show("list"); toast("Deleted");
+  }
+
+  // ---------- backup / restore ----------
+  function showLastBackup(){
+    let t = null; try{ t = localStorage.getItem(BKEY); }catch(_){}
+    $("#lastBackup").textContent = t ? "Last backup: " + new Date(t).toLocaleDateString() : "No backup saved yet.";
+  }
+  async function exportBackup(){
+    const payload = JSON.stringify({app:"recipebox", version:1, exported:new Date().toISOString(), recipes}, null, 2);
+    const name = "recipes-backup-" + new Date().toISOString().slice(0,10) + ".json";
+    const file = new File([payload], name, {type:"application/json"});
+    try{
+      if (navigator.canShare && navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:"Recipe Box backup"});
+      } else {
+        const a = document.createElement("a"); a.href = URL.createObjectURL(file); a.download = name;
+        document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+      }
+      try{ localStorage.setItem(BKEY, new Date().toISOString()); }catch(_){}
+      showLastBackup(); toast("Backup ready");
+    }catch(e){ if (e && e.name !== "AbortError") toast("Couldn't create the backup"); }
+  }
+  function importBackup(file){
+    const fr = new FileReader();
+    fr.onload = () => {
+      try{
+        const data = JSON.parse(fr.result);
+        const list = Array.isArray(data) ? data : data.recipes;
+        if (!Array.isArray(list)) throw 0;
+        let added = 0, updated = 0;
+        const byId = new Map(recipes.map(r=>[r.id, r]));
+        for (const r of list){
+          if (!r || typeof r !== "object" || !r.title) continue;
+          const clean = {id: String(r.id || newId())};
+          for (const k of ["title","category","servings","prepTime","cookTime","ingredients","steps","notes","source","created","updated"]) clean[k] = r[k] == null ? "" : String(r[k]);
+          clean.favorite = !!r.favorite;
+          if (byId.has(clean.id)){ const cur = byId.get(clean.id); if ((clean.updated||"") >= (cur.updated||"")){ Object.assign(cur, clean); updated++; } }
+          else { recipes.push(clean); byId.set(clean.id, clean); added++; }
+        }
+        if (!persist()) return;
+        renderList(); $("#menu").classList.remove("on");
+        toast(`Restored: ${added} new, ${updated} updated`);
+      }catch(_){ toast("That file isn't a Recipe Box backup"); }
+    };
+    fr.readAsText(file);
+  }
+
+  // ---------- events ----------
+  $("#q").addEventListener("input", e => { query = e.target.value; renderList(); });
+  $("#chips").addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if(!b) return;
+    if (b.dataset.fav){ onlyFav = !onlyFav; filterCat = "All"; } else { onlyFav = false; filterCat = b.dataset.cat; }
+    renderList();
+  });
+  $("#list").addEventListener("click", e => { const b=e.target.closest(".item"); if(b) openDetail(b.dataset.id); });
+  document.querySelectorAll("[data-back]").forEach(b=>b.addEventListener("click", ()=>show("list")));
+  $("#addBtn").addEventListener("click", ()=>openEdit(null));
+  $("#editBtn").addEventListener("click", ()=>openEdit(currentId));
+  $("#favBtn").addEventListener("click", toggleFav);
+  $("#cancelBtn").addEventListener("click", ()=> editingId ? openDetail(editingId) : show("list"));
+  $("#saveBtn").addEventListener("click", save);
+  $("#form").addEventListener("submit", e => { e.preventDefault(); save(); });
+  $("#delBtn").addEventListener("click", ()=>$("#modal").classList.add("on"));
+  $("#mNo").addEventListener("click", ()=>$("#modal").classList.remove("on"));
+  $("#mYes").addEventListener("click", doDelete);
+  $("#menuBtn").addEventListener("click", ()=>{ showLastBackup(); $("#menu").classList.add("on"); });
+  $("#menuClose").addEventListener("click", ()=>$("#menu").classList.remove("on"));
+  $("#exportBtn").addEventListener("click", exportBackup);
+  $("#importBtn").addEventListener("click", ()=>$("#importFile").click());
+  $("#importFile").addEventListener("change", e => { const f = e.target.files[0]; if (f) importBackup(f); e.target.value = ""; });
+  $("#d-ing").addEventListener("change", e => {
+    const cb = e.target; if(cb.type!=="checkbox") return;
+    const s = checked[currentId].ing, i = +cb.dataset.i;
+    cb.checked ? s.add(i) : s.delete(i); cb.closest(".ing").classList.toggle("done", cb.checked);
+  });
+  $("#d-steps").addEventListener("click", e => {
+    const li = e.target.closest("li"); if(!li) return;
+    const s = checked[currentId].step, i = +li.dataset.i;
+    s.has(i) ? s.delete(i) : s.add(i); li.classList.toggle("done");
+  });
+
+  // ---------- start ----------
+  recipes = load();
+  if (!storageOk) notice("This browser is blocking storage (private mode?). Recipes won't be kept.");
+  renderList();
+  if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
