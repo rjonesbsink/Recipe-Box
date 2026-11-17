@@ -18,4 +18,7 @@ A recipe keeper for your phone. No account, no sign-in — recipes are saved onl
 - **Shopping list** — add recipes and matching ingredients are combined.
 - **Share** a single recipe as a file (for other Recipe Box users) or as text.
 - **Print** a clean copy of any recipe.
-- **Backups** — ⋯ → Save backup file. If the phone is lost, recipes go with it unless you have a backup.
+- **Meal planner** — plan the week, set servings per meal, send the whole week to the shopping list.
+- **Pantry** — things you keep at home are left off the shopping list.
+- **Unit converter** — show any recipe in Metric or US (incl. cups ⇄ grams and oven temps), plus a kitchen converter (⋯ menu).
+- **Backups** — tap **Back up** at the bottom of the main screen (or ⋯ → Save backup file). One file holds recipes, photos, meal plan, pantry and shopping list; import it with ⋯ → Import. If the phone is lost, recipes go with it unless you have a backup.

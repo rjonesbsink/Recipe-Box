@@ -1,7 +1,7 @@
 // Recipe Box offline support.
 // The app's own files are cached so it opens with no signal. Recipes, photos,
 // the shopping list and timers live on the phone (localStorage / IndexedDB), not here.
-const CACHE = "recipebox-v3";
+const CACHE = "recipebox-v4";
 const FILES = ["./", "index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 const NET_TIMEOUT = 3500; // weak signal: fall back to the saved copy instead of hanging
 
